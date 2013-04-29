@@ -103,6 +103,8 @@ public class MainActivity extends Activity {
 		isSupport();
 		
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+        
+        //testtest
 
         // If there are paired devices, add each one to the ArrayAdapter
         if (pairedDevices.size() > 0) {
