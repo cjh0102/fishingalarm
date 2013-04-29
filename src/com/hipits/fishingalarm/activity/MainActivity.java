@@ -80,6 +80,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
 
 		initScan();
 
@@ -100,6 +101,15 @@ public class MainActivity extends Activity {
 		bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
 		isSupport();
+		
+        Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
+
+        // If there are paired devices, add each one to the ArrayAdapter
+        if (pairedDevices.size() > 0) {
+            for (BluetoothDevice device : pairedDevices) {
+            	devices.add(device);
+            }
+        }
 
 		this.registerReceiver(mReceiver, new IntentFilter(
 				BluetoothDevice.ACTION_FOUND));
