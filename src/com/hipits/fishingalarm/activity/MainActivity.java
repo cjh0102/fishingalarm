@@ -16,6 +16,7 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -79,7 +80,6 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
 
 		initScan();
 
@@ -87,11 +87,13 @@ public class MainActivity extends Activity {
 
 	public void onClick(View view) {
 		if (view.getId() == R.id.scanButton) {
+			
+			registerReceiver();
 
 			if (bluetoothAdapter.isDiscovering()) {
 				bluetoothAdapter.cancelDiscovery();
-			}
-			bluetoothAdapter.startDiscovery();
+			} 
+				bluetoothAdapter.startDiscovery();
 		}
 	}
 
@@ -108,19 +110,22 @@ public class MainActivity extends Activity {
             	devices.add(device);
             }
         }
-
+        
+        registerReceiver();
+	}
+	
+	public void registerReceiver() {
 		this.registerReceiver(mReceiver, new IntentFilter(
 				BluetoothDevice.ACTION_FOUND));
 		this.registerReceiver(mReceiver, new IntentFilter(
 				BluetoothAdapter.ACTION_DISCOVERY_FINISHED));
-
 	}
 
 	public void showBlueDialog() {
-
+		
 		AlertDialog.Builder builder = new AlertDialog.Builder(this);
 		builder.setTitle("BlueTooth List");
-
+		
 		builder.setItems(bluetoothNames, new DialogInterface.OnClickListener() {
 			public void onClick(DialogInterface dialog, int position) {
 				BluetoothDevice device = bluetoothAdapter
@@ -128,7 +133,7 @@ public class MainActivity extends Activity {
 				service.connect(device);
 			}
 		});
-
+		
 		builder.setCancelable(true);
 		builder.create().show();
 	}
@@ -186,17 +191,28 @@ public class MainActivity extends Activity {
 			case MESSAGE_STATE_CHANGE:
 				Log.e("MESSAGE_CHANGE", "" + msg.arg1);
 				break;
+				
 			case MESSAGE_WRITE:
 				String message = new String((byte[]) msg.obj);
 				Log.e("WRITE", message);
 
 				break;
+				
 			case MESSAGE_READ:
+				
 				byte[] readBytes = (byte[]) msg.obj;
 				String readMessage = new String(readBytes, 0, msg.arg1);
+				
+				Log.e("test", readMessage);
+				
+				if (readMessage.equals("R")) {//들여 올렸을 경우
+			    }
+				
+			    else if (readMessage.endsWith("G")) {//물고기가 물었을 경우
+			     Vibrator vibe = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+			     vibe.vibrate(1000);
+			    }
 
-				Toast.makeText(MainActivity.this, readMessage,
-						Toast.LENGTH_SHORT).show();
 				break;
 				
 			case MESSAGE_DEVICE_NAME:
@@ -218,6 +234,7 @@ public class MainActivity extends Activity {
 	private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
 		@Override
 		public void onReceive(Context context, Intent intent) {
+			
 			String action = intent.getAction();
 
 			// When discovery finds a device
@@ -238,6 +255,7 @@ public class MainActivity extends Activity {
 				// When discovery is finished, change the Activity title
 			} else if (BluetoothAdapter.ACTION_DISCOVERY_FINISHED
 					.equals(action)) {
+				
 				bluetoothNames = new String[devices.size()];
 
 				for (int i = 0; i < devices.size(); i++) {
