@@ -68,7 +68,6 @@ public class MainActivity extends Activity {
 	@Override
 	protected void onResume() {
 		super.onResume();
-
 		if (service != null) {
 			if (service.getState() == BluetoothChatService.STATE_NONE) {
 				service.start();
